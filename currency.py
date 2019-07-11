@@ -2,10 +2,18 @@ from flask import Flask, jsonify
 import requests, json
 import xml.etree.ElementTree as ET
 from datetime import date
+from flask.ext.cache import Cache
 
 app = Flask(__name__)  
 
+cache = Cache(app, config={
+    'CACHE_TYPE': 'memcached',
+    'CACHE_MEMCACHED_SERVERS': ['127.0.0.1:11212'],
+    'CACHE_DEFAULT_TIMEOUT': 0
+})
+
 @app.route('/currency')
+@cache.cached(timeout=15 * 60)
 def currency():
     root = getResp()
 
@@ -24,6 +32,7 @@ def currency():
         return 'Bad Request'
 
 @app.route('/currency/<string:id>')
+@cache.cached(timeout=15 * 60)
 def oneCurrency(id):
 
     root = getResp()
